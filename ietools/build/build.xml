@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="gb2312"?>
+<!-- IWF external Build File-->
+
+<project name="project" default="developer" basedir=".">
+	<!-- 主干 buildno-->
+		<property name="cmd.build" 	value="" />
+	<!-- 分支 buildno-->
+	<!--
+		<property name="cmd.build" 	value="-b" />
+	-->
+
+	<!-- set properties for common base part-->
+    <property name="hostcableview.dir"        	value=".."/>
+    <property name="hostcableview.topo.dir"   	value="${hostcableview.dir}/topo"/>
+    <property name="hostcableview.system.dir"   value="${hostcableview.dir}/system"/>	
+    <property name="hostcableview.lib.dir"    value="${hostcableview.dir}/lib"/>
+
+    <!-- CVS tag and update command -->
+    <property name="cvs.tag" 				value="" />
+  	<property name="cvs.update.command" 	value="-q update -P -A -d -C" />
+
+
+	<!-- set classpath needed -->
+	<path id="base.path">
+		<!-- our new class -->
+		<pathelement location="${build.classes.dir}"/>
+
+		<!-- depdent class  -->
+		<!--
+		<fileset dir="">
+			<include name=""/>
+		</fileset>
+		-->
+
+	</path>
+
+
+	<target name="init">
+		<!-- Create the time stamp -->
+		<tstamp/>
+		<delete>
+			<fileset dir="${hostcableview.lib.dir}">
+				<include name="*.jar"/>
+				<include name="*.war"/>
+			</fileset>
+		</delete>
+		<delete dir="${build.classes.dir}"/>
+	</target>
+
+
+	<!--
+	=========================================
+		Compile Part
+	=========================================
+	-->
+	<target name="compile_all" depends="compile_system,compile_api,compile_component"/>
+	
+	<target name="compile_system" depends="init">
+    	<echo message="============== building hostcableview_system ==================="/>
+        <ant inheritAll="false" dir="${hostcableview.system.dir}/build" antfile="build.xml" target="main"/>
+    	<echo message="=========== builded hostcableview_system successfully ========="/>
+    	<echo message=""/>
+	</target>
+
+	<target name="compile_api" depends="init">
+    
+    	<echo message="============== building hostcableview_topo_api ==================="/>
+        <ant inheritAll="false" dir="${hostcableview.topo.dir}/build" antfile="build.xml" target="build_api"/>
+    	<echo message="=========== builded hostcableview_topo_api successfully ========="/>
+    	<echo message=""/>
+
+	</target>
+	
+	<target name="compile_component" depends="init">
+        
+    	<echo message="============== building hostcableview_topo_component ==================="/>
+        <ant inheritAll="false" dir="${hostcableview.topo.dir}/build" antfile="build.xml" target="build_component"/>
+    	<echo message="=========== builded hostcableview_topo_component successfully ========="/>
+    	<echo message=""/>    	
+	</target>
+	
+
+  	<target name="deploy" depends="deploy_system,deploy_client,deploy_service">
+  	</target>
+	
+	<target name="deploy_system">
+  		<!-- copy switch system -->
+	        <copy todir="${hostcableview.lib.dir}" overwrite="true">
+	            <mapper type="flatten"/>
+	            <fileset dir="${hostcableview.system.dir}">
+	                <include name="lib/*.jar"/>
+	            </fileset>
+		</copy>
+  	</target>
+	
+  	<target name="deploy_client">
+
+		<delete dir="${hostcableview.lib.dir}/tmp" includeEmptyDirs="true"/>
+		<mkdir dir="${hostcableview.lib.dir}/tmp/client" />
+
+		<!-- rejar switch client -->
+    		<echo message="============== jar hostcableview client ==================="/>
+
+		<unzip dest="${hostcableview.lib.dir}/tmp/client">
+            	<fileset dir="${hostcableview.topo.dir}/lib">
+	                <include name="*api.jar"/>
+	                <include name="*client.jar"/>
+            	</fileset>  
+            	
+	        <fileset dir="${hostcableview.system.dir}/lib">
+	                <include name="*.jar"/>
+	        </fileset>           
+        </unzip>
+
+        <jar destfile="${hostcableview.lib.dir}/hc_topo_client.jar"
+        	 basedir="${hostcableview.lib.dir}/tmp/client"
+        	 excludes="META-INF/*" />
+		<delete dir="${hostcableview.lib.dir}/tmp" includeEmptyDirs="true"/>
+  	</target>
+
+
+  	<target name="deploy_service">
+
+		<delete dir="${hostcableview.lib.dir}/tmp" includeEmptyDirs="true"/>
+		<mkdir dir="${hostcableview.lib.dir}/tmp/service" />
+
+		<!-- rejar switch service -->
+    	<echo message="============== jar hostcableview service ==================="/>
+
+		<unzip dest="${hostcableview.lib.dir}/tmp/service">
+            <fileset dir="${hostcableview.topo.dir}/lib">
+                <include name="*api.jar"/>
+                <include name="*service.jar"/>
+            </fileset>
+            
+        </unzip>
+
+        <jar destfile="${hostcableview.lib.dir}/hc_topo_service.jar"
+        	 basedir="${hostcableview.lib.dir}/tmp/service"
+        	 excludes="META-INF/*" />
+
+		<delete dir="${hostcableview.lib.dir}/tmp" includeEmptyDirs="true"/>
+  	</target>
+
+
+
+
+  	<target name="clean">
+		<delete dir="${hostcableview.lib.dir}/tmp" includeEmptyDirs="true"/>
+  	</target>
+
+
+
+	<target name="fetch">
+    	<echo message="============== fetch hostcableview ==================="/>
+	    <delete>
+	        <fileset dir="${hostcableview.dir}" includes="**/lib/*.jar"/>
+    	</delete>
+
+        <cvs dest="${hostcableview.dir}" command="${cvs.update.command}"/>
+
+    	<echo message="============== fetch hostcableview successful ==================="/>
+	</target>
+
+
+
+  	<target name="build" depends="compile_all, deploy"/>
+
+  	<target name="main" depends="build, clean"/>
+
+  	<target name="all" depends="fetch, main"/>
+
+
+  	<target name="showoption">
+    	<echo message="please selecte one target to build:"/>
+    	<echo message="all:            build all component include fetch"/>
+    	<echo message="main:           build all component"/>
+  	</target>
+
+  	<target name="developer" depends="showoption"/>
+
+
+</project>

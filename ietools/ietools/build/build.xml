@@ -1,0 +1,343 @@
+<!-- Ant Build file for java source
+-->
+
+<project name="project" default="developer" basedir=".">
+
+  <property name="nowarn" value="off" />
+  <property name="debug" value="off" />
+  <property name="deprecation" value="off" />
+  <property name="optimize" value="off" />
+
+
+  <!-- set properties for common base part-->
+  <property name="src.dir" value="../src"/>
+  <property name="build.classes.dir" value="classes"/>
+  <property name="build.api" value="../doc"/>
+  <property name="jvdoc.pkg" value="gxlu.ossc.hostcableview.topo.*"/>
+  <property name="jvdoc.title" value="GXLU HOSTCABLEVIEW EQUIP PACKAGE"/>
+
+  <property name="lib.dir"  value="../lib"/>
+  <property name="api.jar"  	value="hc_topo_api.jar"/>
+  <property name="component_client.jar" value="hc_topo_client.jar"/>
+  <property name="component_service.jar" value="hc_topo_service.jar"/>
+  
+  <property name="cmp.dir"				value="gxlu/ossc/hostcableview/topo"/>
+  <property name="cmp.api.orig"			value="${cmp.dir}/api"/>
+  <property name="cmp.api.moved"		value="${cmp.dir}/api_tmp"/>
+  <property name="cmp.service.orig"     value="${cmp.dir}/components/service"/>
+  <property name="cmp.service.moved" 	value="${cmp.dir}/components/service_tmp"/>
+
+
+  <!-- set properties for dependent modules -->
+  <property name="root.dir"     value="../../../.."/>
+  <property name="afx.dir"      value="${root.dir}/afx"/>
+  <property name="basic.dir"       	value="${root.dir}/invbasic"/>
+  
+  <property name="data.dir" 		value="${root.dir}/datanetwork"/>
+  <property name="data.data.dir" 	value="${data.dir}/datanetwork"/>
+  
+  <property name="hostcableview.dir"     		value="${root.dir}/hostcableview"/>
+  <property name="hostcableview.hostcableview.dir" 	value="${hostcableview.dir}/hostcableview"/>
+  <property name="hostcableview.system.dir"		value="${hostcableview.hostcableview.dir}/system"/>
+  
+  <property name="mobile.dir" 		value="${root.dir}/mobilenetwork"/>
+  <property name="mobile.mobile.dir" 	value="${mobile.dir}/mobilenetwork"/>
+  
+  <property name="netgeo.dir" 		value="${root.dir}/nmbfGis/Noga"/>
+  <property name="netgeo.server.dir"    value="${netgeo.dir}/releaseServer"/>
+  
+  <property name="switch.dir" 		value="${root.dir}/switchnetwork"/>
+  <property name="switch.switch.dir" 	value="${switch.dir}/switchnetwork"/>
+  
+  <property name="power.dir" 		value="${root.dir}/powernetwork"/>
+  <property name="power.power.dir" 	value="${power.dir}/powernetwork"/>
+  
+  <property name="trans.dir" 			value="${root.dir}"/>
+  <property name="trans.client.dir" 		value="${root.dir}/nm"/>
+  
+  <property name="trans.it.dir"        		value="${trans.dir}/it"/>
+  
+  <property name="trans.deploy.dir"        	value="${trans.it.dir}/deploy"/>
+  <property name="trans.toss.dir" 		value="${trans.deploy.dir}/toss"/>
+  <property name="trans.deploy.client.dir"	value="${trans.toss.dir}/client"/>
+  <property name="trans.deploy.client.nm.dir"	value="${trans.deploy.client.dir}/nm"/>
+    	
+  <property name="trans.deploy.service.dir"	value="${trans.toss.dir}/service"/>
+  
+  
+
+  <!-- set the properties for thirdparty lib -->
+  <property name="cots.dir"     value="${root.dir}/cots/thirdparty"/>
+
+  <!-- set classpath needed -->
+  <path id="base.path">
+      <!-- our new class -->
+      <pathelement location="${build.classes.dir}"/>
+      
+      <!-- depdent class  -->
+      <fileset dir="${cots.dir}">
+        <include name="toplink/lib/*.jar"/>
+        <include name="apache/poi/lib/poi.jar"/>
+      </fileset>
+      
+      <fileset dir="${hostcableview.hostcableview.dir}">
+        <include name="lib/*.jar"/>
+      </fileset>
+      
+      <fileset dir="${hostcableview.system.dir}">
+        <include name="lib/*.jar"/>
+      </fileset>
+      
+      <fileset dir="${mobile.mobile.dir}">
+        <include name="lib/mobile_service.jar"/>
+        <include name="lib/mobile_common.jar"/>
+        <include name="lib/mobile_system.jar"/>
+    </fileset>
+    
+    <fileset dir="${switch.switch.dir}">
+        <include name="lib/switch_service.jar"/>
+        <include name="lib/switch_common.jar"/>
+        <include name="lib/switch_system.jar"/>
+    </fileset>
+    
+   <fileset dir="${data.data.dir}">
+        <include name="lib/data_service.jar"/>
+        <include name="lib/data_common.jar"/>
+        <include name="lib/data_system.jar"/>
+    </fileset>
+    
+    <fileset dir="${power.power.dir}">
+        <include name="lib/power_service.jar"/>
+        <include name="lib/basic_common.jar"/>
+        <include name="lib/power_system.jar"/>
+    </fileset>
+    
+    <fileset dir="${basic.dir}">
+        <include name="lib/basic_service.jar"/>
+        <include name="lib/basic_common.jar"/>
+    </fileset>
+    
+    <fileset dir="${afx.dir}">
+        <include name="lib/afx.jar"/>
+    </fileset>
+    
+    <fileset dir="${trans.client.dir}">
+                <include name="lib/*.jar"/>
+    </fileset>
+
+    <fileset dir="${netgeo.server.dir}/lib">
+		      		<include name="*.jar"/>
+		      		<exclude name="log4j.jar"/>
+		      		<exclude name="ojdbc14.jar"/>
+    </fileset>
+
+  </path>
+
+
+  <target name="init">
+    <!-- Create the time stamp -->
+    <tstamp/>
+    <delete> 
+      <fileset dir="${lib.dir}">
+        <include name="${api.jar}"/>
+        <include name="${component_client.jar}"/>
+        <include name="${component_service.jar}"/>
+      </fileset>
+    </delete>
+    <delete dir="${build.classes.dir}"/>
+  </target>
+
+
+
+
+  <target name="compile" depends="compile_api, compile_service, compile_rmi"/>
+
+
+
+
+  <target name="compile_all" depends="init">
+    <!-- Create the build directory structure used by compile -->
+    <mkdir dir="${build.classes.dir}"/>
+        <!-- compile java file -->
+    <record name="log.txt" action="start"/>        	
+    <javac srcdir="${src.dir}"
+        encoding="GBK"         
+        destdir="${build.classes.dir}" 
+   	   	nowarn="${nowarn}"
+        debug="${debug}"
+        deprecation="${deprecation}"
+        optimize="${optimize}"
+        classpathref="base.path"
+    />
+   <rmic  base="${build.classes.dir}"
+          classpathref="base.path"
+          includes="**/*RemoteImpl.class"
+   />        
+    <record name="log.txt" action="stop"/>        	
+  </target>
+
+
+
+  <!--
+  	=============================================================
+  	=	Compile the module of api
+  	=============================================================
+  -->  
+  <target name="compile_api" depends="init">
+    <!-- Create the build directory structure used by compile -->
+    <mkdir dir="${build.classes.dir}"/>
+
+    <move todir="${src.dir}/${cmp.service.moved}">
+    	<fileset dir="${src.dir}/${cmp.service.orig}"/>
+    </move>  
+
+	<!-- compile java file -->
+    <record name="log_api.txt" action="start"/>
+    <javac srcdir="${src.dir}"
+    	includes="${cmp.api.orig}/**/*.java"
+        encoding="GBK"         
+    	destdir="${build.classes.dir}" 
+   	   	nowarn="${nowarn}"
+        debug="${debug}"
+        deprecation="${deprecation}"
+        optimize="${optimize}"
+    	classpathref="base.path"
+    />
+    <record name="log_api.txt" action="stop"/>
+
+    <move todir="${src.dir}/${cmp.service.orig}">
+    	<fileset dir="${src.dir}/${cmp.service.moved}"/>
+    </move>
+    <delete dir="${src.dir}/${cmp.service.moved}"/>
+
+  </target>
+
+
+  <!--
+  	=============================================================
+  	=	Compile the module of service
+  	=============================================================
+  -->  
+  <target name="compile_service">
+    <!-- Create the build directory structure used by compile -->
+    <mkdir dir="${build.classes.dir}"/>
+    
+	<!-- compile java file -->
+    <record name="log_service.txt" action="start"/>
+    <javac srcdir="${src.dir}"
+    	includes="${cmp.service.orig}/**/*.java"
+        encoding="GBK"         
+    	destdir="${build.classes.dir}" 
+   	   	nowarn="${nowarn}"
+        debug="${debug}"
+        deprecation="${deprecation}"
+        optimize="${optimize}"
+    	classpathref="base.path"
+    />
+    <record name="log_service.txt" action="stop"/>
+    
+  </target>
+
+
+  <!--
+  	=============================================================
+  	=	Compile rmi stub & skeleton
+  	=============================================================
+  -->  
+  <target name="compile_rmi" depends="compile_service">
+   <rmic  base="${build.classes.dir}"
+          classpathref="base.path"
+          includes="**/*RemoteImpl.class"
+   />  
+  </target>
+
+
+
+  <!--
+  	=============================================================
+  	=	Jar the module of api
+  	=============================================================
+  -->  
+  <target name="jar_api" depends="compile_api">
+    <jar jarfile="${lib.dir}/${api.jar}">
+         <fileset dir="${build.classes.dir}"
+           includes="${cmp.api.orig}/**"
+         />
+    </jar>
+  </target>
+
+
+
+  <!--
+  	=============================================================
+  	=	Jar the module of client
+  	=============================================================
+  -->  
+  <target name="jar_component_client" depends="compile_service, compile_rmi">
+    <jar jarfile="${lib.dir}/${component_client.jar}">
+         <fileset dir="${build.classes.dir}"
+           includes="${cmp.service.orig}/**/*Stub.class"
+         />
+    </jar>
+  </target>
+
+
+
+  <!--
+  	=============================================================
+  	=	Jar the module of service
+  	=============================================================
+  -->  
+  <target name="jar_component_service" depends="compile_service, compile_rmi">
+    <!-- create jar file and put it in the lib directory -->
+    <jar jarfile="${lib.dir}/${component_service.jar}">
+         <fileset dir="${build.classes.dir}"
+           includes="${cmp.service.orig}/**"
+         />
+    </jar>
+  </target>
+
+  
+  <target name="jar" depends="jar_api, jar_component_client, jar_component_service"/>
+
+
+  <target name="docs-javadocs-check">
+    <!-- if index.html is newer than the sources we are up to date -->
+    <uptodate property="docs-javadocs.disable"
+          targetfile="${build.api}/index.html">
+          <srcfiles dir="${src.dir}" includes="**/*.java"/>
+    </uptodate>
+  </target>       
+
+  
+  <target name="docs" depends="docs-javadocs-check" unless="docs-javadocs.disable">
+    <mkdir dir="${build.api}"/>
+    <javadoc packagenames="${jvdoc.pkg}"
+            sourcepath="${src.dir}"
+            classpathref="base.path"
+            destdir="${build.api}"
+            windowtitle="${jvdoc.title}"
+            author="true"
+            version="true"
+            use="true"> 
+    </javadoc>
+  </target>
+
+  
+  <target name="clean">
+    <!-- Delete the ${build}directory trees -->
+    <delete dir="${build.classes.dir}"  includeEmptyDirs="true"/>
+  </target>
+
+
+  <target name="build" depends="compile, jar"/>
+
+  <target name="build_api" depends="compile_api, jar_api"/>
+
+  <target name="build_component" depends="compile_service, compile_rmi, jar_component_client, jar_component_service, clean"/>
+
+  <target name="main" depends="build, clean"/>
+
+  <target name="developer" depends="main"/>
+
+</project>
