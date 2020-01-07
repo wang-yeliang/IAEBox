@@ -18,17 +18,17 @@ import java.util.*;
  */
 public class ResultController implements Serializable{
 	/**
-	 * 
+	 *  
 	 */
 	private static final long serialVersionUID = 1L;
 
 	/**
-	 * ¶ÔÏóÖµ×ÜÊý
+	 * ï¿½ï¿½ï¿½ï¿½Öµï¿½ï¿½ï¿½ï¿½
 	 */
 	private int objectValueCount = 0;
 
 	/**
-	 * ¶ÔÏó¼¯ºÏ
+	 * ï¿½ï¿½ï¿½ó¼¯ºï¿½
 	 */
 	private Collection result = null;
 	
@@ -37,11 +37,11 @@ public class ResultController implements Serializable{
 	private Property property;
 	
 	/**
-	 * ²Ù×÷½á¹ûÐÅÏ¢
+	 * ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢
 	 * 	-- Object[]
 	 *		- object[2]
-	 * 		 + Boolean* true:ÕýÈ· false:´íÎó
-	 * 		 + String* ´íÎóÔ­Òò
+	 * 		 + Boolean* true:ï¿½ï¿½È· false:ï¿½ï¿½ï¿½ï¿½
+	 * 		 + String* ï¿½ï¿½ï¿½ï¿½Ô­ï¿½ï¿½
 	 */
 	private Object[] operationMessage;
 	
@@ -49,7 +49,7 @@ public class ResultController implements Serializable{
 	
 	private int numRowsCount;
 	/**
-	 * ¶¯Ì¬¶ÔÏó
+	 * ï¿½ï¿½Ì¬ï¿½ï¿½ï¿½ï¿½
 	 */
 	private DynamicObject dynamicObject = null;
   private Map propertyMap = null;
